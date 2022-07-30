@@ -1,0 +1,164 @@
+*,
+*::before,
+*::after {
+  box-sizing:border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: sans;
+  font-size: 1em;
+}
+
+body {
+  background-color: #333;
+}
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 50px 173px 50px;
+  grid-template-rows: repeat(2, 50px);
+  justify-content: center;
+  align-content: center;
+  row-gap: 9px;
+  /*place-items: center;*/
+}
+
+.watch {
+  width: 173px;
+  height: 109px;
+  grid-row: span 2;
+  background-color: #BBB;
+  display: grid;
+  /*grid-template-columns: repeat(7, 1fr);*/
+  grid-template-columns: 25.56px 60.13px 87.3px;
+  grid-template-rows: 45px 25px 39px;
+  border-radius: 8px;
+}
+
+.pilots-column {
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+}
+
+.day {
+  padding-top: 8px;
+  margin-left: -5px;
+  width: 57.14px;
+  height: 45px;
+  display: flex;
+  /*grid-column: span 2;*/
+  justify-content: center;
+  align-items: center;
+  /*margin-top: 50px;*/
+  font-size: 1.7rem;
+}
+
+.month-date {
+  /*grid-column: span 4;*/
+}
+
+.month-date-container {
+  width: 86.3px;
+  height: 37px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  font-size: 1.7rem;
+  margin: 8px 0 0 -7px;
+  border: 1px solid black;
+  border-radius: 8px;
+}
+
+.month-date-container > div {
+  margin-top: -1px;
+}
+
+.digit {
+  width: 1ch;
+}
+
+.month {
+  display: flex
+}
+
+.date {
+  display: flex
+}
+
+.pilots-row {
+  width: 172.97;
+  height: 20px;
+  /*margin-top: -5px;*/
+  /*overflow: hidden;*/
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-around;
+  align-items: end;
+  font-size: 0.9rem;
+}
+
+.flash {
+  width: 20.8px;
+  height: 38px;
+  padding-top: 20px;
+  font-size: 1.3rem;
+}
+
+.fa-sun {
+}
+
+.time {
+  grid-column: 1 / -1;
+  display: flex;
+  width: 100%;
+  height: 45px;
+  margin-top: -7px;
+  /*justify-content: space-around;*/
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+  display: flex;
+  padding-bottom: 7px;
+}
+
+.hours {
+  display: flex;
+}
+
+.minutes {
+  display: flex;
+}
+
+.seconds {
+  height: 100%;
+  display: flex;
+  padding-top: 4px;
+  align-items: flex-start;
+  font-size: 2rem;
+}
+
+.disable {
+  /*color: #BBBBBB;*/
+  color: #B6B6B6;
+}
+
+.d-none {
+  display: none;
+}
+
+.hot {
+  display:flex;
+}
+
+.lightOn {
+  background-color: #22ff22;
+}
