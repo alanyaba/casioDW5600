@@ -67,6 +67,11 @@ class Watch {
     this.alarm = true
     this.sig = true
 
+    this.alarmHours = 0
+    this.alarmMinutes = 0
+    this.alarmMonth = null
+    this.alarmDayOfMonth = null
+
     this.displayScreen()
     this.idUpdateTime = setInterval(() => {
       if (!this.adjusting) {
@@ -289,10 +294,119 @@ class Watch {
     this.dayOfMonth2El.innerText = this.toString(this.dayOfMonth)[1]
   }
 
+  activeElementsOnModeAlarm() {
+    if (this.format24hr) {
+      this.format24hrEl.classList.remove('disable')
+      this.pmEl.classList.add('disable')
+    } else {
+      this.format24hrEl.classList.add('disable')
+      if (this.alarmHours >= 12) {
+        this.pmEl.classList.remove('disable')
+      } else {
+        this.pmEl.classList.add('disable')
+      }
+    }
+    if (this.adjustData !== 'alarmHours') {
+      if (this.format24hr) {
+        this.hours1El.classList.remove('disable')
+        this.hours2El.classList.remove('disable')
+      } else {
+        if (this.alarmHours === 0) {
+          this.hours1El.classList.remove('disable')
+          this.hours2El.classList.remove('disable')
+        } else if (0 < this.alarmHours && this.alarmHours <= 9) {
+          this.hours1El.classList.add('disable')
+          this.hours2El.classList.remove('disable')
+        } else if (9 < this.alarmHours && this.alarmHours <= 12) {
+          this.hours1El.classList.remove('disable')
+          this.hours2El.classList.remove('disable')
+        } else if (12 < this.alarmHours && this.alarmHours <= 21) {
+          this.hours1El.classList.add('disable')
+          this.hours2El.classList.remove('disable')
+        } else if (21 < this.alarmHours) {
+          this.hours1El.classList.remove('disable')
+          this.hours2El.classList.remove('disable')
+        }
+      }
+    }
+    if (this.adjustData !== 'alarmMinutes') {
+      this.minutes1El.classList.remove('disable')
+      this.minutes2El.classList.remove('disable')
+    }
+    if (this.adjustData !== 'alarmMonth') {
+      if (this.alarmMonth === null) {
+        this.month1El.classList.add('disable')
+        this.month2El.classList.remove('disable')
+      } else if (this.alarmMonth < 10) {
+        this.month1El.classList.add('disable')
+        this.month2El.classList.remove('disable')
+      } else {
+        this.month1El.classList.remove('disable')
+        this.month2El.classList.remove('disable')
+      }
+    }
+    if (this.adjustData !== 'alarmDayOfMonth') {
+      if (this.alarmDayOfMonth === null) {
+        this.dayOfMonth1El.classList.remove('disable')
+        this.dayOfMonth2El.classList.remove('disable')
+      }else if (this.alarmDayOfMonth < 10) {
+        this.dayOfMonth1El.classList.add('disable')
+        this.dayOfMonth2El.classList.remove('disable')
+      } else {
+        this.dayOfMonth1El.classList.remove('disable')
+        this.dayOfMonth2El.classList.remove('disable')
+      }
+    }
+  }
+
+  displayModeAlarm() {
+    this.activeElementsOnModeAlarm()
+    this.seconds1El.innerText = '0'
+    this.seconds2El.innerText = '0'
+    this.seconds1El.classList.add('disable')
+    this.seconds2El.classList.add('disable')
+    if (this.format24hr) {
+      this.hours1El.innerText = this.toString(this.alarmHours)[0]
+      this.hours2El.innerText = this.toString(this.alarmHours)[1]
+    } else {
+      if (this.alarmHours === 0) {
+        this.hours1El.innerText = '1'
+        this.hours2El.innerText = '2'
+      } else if (this.alarmHours < 13) {
+        this.hours1El.innerText = this.toString(this.alarmHours)[0]
+        this.hours2El.innerText = this.toString(this.alarmHours)[1]
+      } else if (this.alarmHours >= 13) {
+        this.hours1El.innerText = this.toString(this.alarmHours - 12)[0]
+        this.hours2El.innerText = this.toString(this.alarmHours - 12)[1]
+      }
+    }
+    this.minutes1El.innerText = this.toString(this.alarmMinutes)[0]
+    this.minutes2El.innerText = this.toString(this.alarmMinutes)[1]
+    this.dayOfWeek1El.innerText = 'A'
+    this.dayOfWeek2El.innerText = 'L'
+    if (!(this.alarmMonth === null)) {
+      this.month1El.innerText = this.toString(this.alarmMonth)[0]
+      this.month2El.innerText = this.toString(this.alarmMonth)[1]
+    } else {
+      this.month1El.innerText = '-'
+      this.month2El.innerText = '-'
+    }
+    if (!(this.alarmDayOfMonth === null)) {
+      this.dayOfMonth1El.innerText = this.toString(this.alarmDayOfMonth)[0]
+      this.dayOfMonth2El.innerText = this.toString(this.alarmDayOfMonth)[1]
+    } else {
+      this.dayOfMonth1El.innerText = '-'
+      this.dayOfMonth2El.innerText = '-'
+    }
+  }
+
   displayScreen() {
     const modes = {
       'time': () => {
         this.displayModeTime()
+      },
+      'alarm': () => {
+        this.displayModeAlarm()
       }
     }
     if (!modes[this.mode]) return
@@ -308,10 +422,17 @@ class Watch {
         'year': 'month',
         'month': 'dayOfMonth',
         'dayOfMonth': 'seconds'
+      },
+      'alarm': {
+        'alarmHours': 'alarmMinutes',
+        'alarmMinutes': 'alarmMonth',
+        'alarmMonth': 'alarmDayOfMonth',
+        'alarmDayOfMonth': 'alarmHours'
       }
     }
     const defaultInitialData = {
-      'time': 'seconds'
+      'time': 'seconds',
+      'alarm': 'alarmHours'
     }
     if (!this.adjustData) {
       this.adjustData = defaultInitialData[this.mode]
@@ -374,6 +495,66 @@ class Watch {
           }
         },
         'dayOfMonth': () => {
+          if (this.dayOfMonth1El.innerText === '0') {
+            this.dayOfMonth1El.classList.add('disable')
+            this.dayOfMonth2El.classList.toggle('disable')
+          } else {
+            if (this.dayOfMonth2El.classList.contains('disable')) {
+              this.dayOfMonth1El.classList.remove('disable')
+              this.dayOfMonth2El.classList.remove('disable')
+            } else {
+              this.dayOfMonth1El.classList.add('disable')
+              this.dayOfMonth2El.classList.add('disable')
+            }
+          }
+        }
+      },
+      'alarm': {
+        'alarmHours': () => {
+          if (this.format24hr) {
+            if (this.hours1El.classList.contains('disable')) {
+              this.hours1El.classList.remove('disable')
+              this.hours2El.classList.remove('disable')
+            } else {
+              this.hours1El.classList.add('disable')
+              this.hours2El.classList.add('disable')
+            }
+          } else {
+            if (this.hours1El.innerText === '0') {
+              this.hours1El.classList.add('disable')
+              this.hours2El.classList.toggle('disable')
+            } else {
+              if (this.hours2El.classList.contains('disable')) {
+                this.hours1El.classList.remove('disable')
+                this.hours2El.classList.remove('disable')
+              } else {
+                this.hours1El.classList.add('disable')
+                this.hours2El.classList.add('disable')
+              }
+            }
+          }
+        },
+        'alarmMinutes': () => {
+          this.minutes1El.classList.toggle('disable')
+          this.minutes2El.classList.toggle('disable')
+        },
+        'alarmMonth': () => {
+          if (this.month1El.innerText === '-'
+            || this.month1El.innerText === '0'
+          ) {
+            this.month1El.classList.add('disable')
+            this.month2El.classList.toggle('disable')
+          } else {
+            if (this.month2El.classList.contains('disable')) {
+              this.month1El.classList.remove('disable')
+              this.month2El.classList.remove('disable')
+            } else {
+              this.month1El.classList.add('disable')
+              this.month2El.classList.add('disable')
+            }
+          }
+        },
+        'alarmDayOfMonth': () => {
           if (this.dayOfMonth1El.innerText === '0') {
             this.dayOfMonth1El.classList.add('disable')
             this.dayOfMonth2El.classList.toggle('disable')
@@ -506,6 +687,70 @@ class Watch {
               this.dayOfMonth1El.classList.add('disable')
             }
           }
+        },
+        'alarm': {
+          'alarmHours': () => {
+            ++this.alarmHours
+            if (this.alarmHours > 23) {
+              this.alarmHours = 0
+            }
+            this.displayScreen()
+            if (!this.format24hr) {
+              if (this.hours1El.innerText === '1') {
+                if (this.hours2El.classList.contains('disable')) {
+                  this.hours1El.classList.add('disable')
+                } else {
+                  this.hours1El.classList.remove('disable')
+                }
+              } else {
+                this.hours1El.classList.add('disable')
+              }
+            }
+          },
+          'alarmMinutes': () => {
+            ++this.alarmMinutes
+            if (this.alarmMinutes > 59) this.alarmMinutes = 0
+          },
+          'alarmMonth': () => {
+            if (this.alarmMonth === null) {
+              this.alarmMonth = 1
+              this.dayOfMonth1El.classList.add('disable')
+            } else {
+              ++this.alarmMonth
+            }
+            if (this.alarmMonth > 9) {
+              if (this.month2El.classList.contains('disable')) {
+                this.month1El.classList.add('disable')
+              } else {
+                this.month1El.classList.remove('disable')
+              }
+            }
+            if (this.alarmMonth > 12) {
+              this.alarmMonth = null
+              this.month1El.classList.add('disable')
+            }
+          },
+          'alarmDayOfMonth': () => {
+            if (this.alarmDayOfMonth === null) {
+              this.alarmDayOfMonth = 1
+              this.dayOfMonth1El.classList.add('disable')
+            } else {
+              ++this.alarmDayOfMonth
+            }
+            if (this.alarmDayOfMonth > 9) {
+              if (this.dayOfMonth2El.classList.contains('disable')) {
+                this.dayOfMonth1El.classList.add('disable')
+              } else {
+                this.dayOfMonth1El.classList.remove('disable')
+              }
+            }
+            if (this.alarmDayOfMonth > this.getMaxDaysOnMonth(
+              this.alarmMonth || 1,
+              this.year
+            )) {
+              this.alarmDayOfMonth = null
+            }
+          }
         }
       }
       adjust[this.mode][this.adjustData]()
@@ -535,6 +780,7 @@ class Watch {
       this.displayScreen()
     } else {
       this.changeMode()
+      this.displayScreen()
     }
   }
 
