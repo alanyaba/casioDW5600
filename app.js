@@ -43,7 +43,7 @@ class Watch {
     this.flashEl = flashEl
 
     this.hours = 0
-    this.minutes = 59
+    this.minutes = 50
     this.seconds = 56
     this.year = 2000
     this.month = 2
@@ -85,9 +85,21 @@ class Watch {
 
     this.timerActive = false
     this.timerPause = false
-    // cuidado con este
-    this.timerFinish = false
     this.idTimer = null
+
+    this.stopwatchHours = 0
+    this.stopwatchMinutes = 0
+    this.stopwatchSeconds = 0
+    this.stopwatchHundredthsOfSeconds = 0
+    this.stopwatchSplitHours = 0
+    this.stopwatchSplitMinutes = 0
+    this.stopwatchSplitSeconds = 0
+    this.stopwatchSplitHundredthsOfSeconds = 0
+
+    this.stopwatchActive = false
+    this.stopwatchPause = null
+    this.stopwatchSplit = null
+    this.idStopwatch = null
 
     this.idSepMonthAndDay = null
 
@@ -105,7 +117,7 @@ class Watch {
     }, 1000)
     this.idDisplayScreen = setInterval(() => {
       this.displayScreen()
-    }, 1000)
+    }, 10)
   }
 
   isLeapYear(year) {
@@ -190,7 +202,6 @@ class Watch {
       if (!this.auto) {
         clearInterval(this.idTimer)
         this.idTimer = null
-        this.timerFinish = true
         this.timerActive = false
         this.timerPause = false
       } else {
@@ -209,6 +220,24 @@ class Watch {
       --this.timerHours
     }
     this.displayScreen()
+  }
+
+  updateStopwatch() {
+    if (!(this.stopwatchPause)) {
+      ++this.stopwatchHundredthsOfSeconds
+    }
+    if (this.stopwatchHundredthsOfSeconds > 99) {
+      this.stopwatchHundredthsOfSeconds = 0
+      ++this.stopwatchSeconds
+    }
+    if (this.stopwatchSeconds > 59) {
+      this.stopwatchSeconds = 0
+      ++this.stopwatchMinutes
+    }
+    if (this.stopwatchMinutes > 59) {
+      this.stopwatchMinutes = 0
+      ++this.stopwatchHours
+    }
   }
 
   getDayOfWeek(year, monthOfYear, dayOfMonth) {
@@ -493,7 +522,103 @@ class Watch {
     this.seconds2El.innerText = this.toString(this.timerSeconds)[1]
     this.dayOfWeek1El.innerText = 'T'
     this.dayOfWeek2El.innerText = 'R'
-    // tete
+    if (this.format24hr) {
+      this.month1El.innerText = this.toString(this.hours)[0]
+      this.month2El.innerText = this.toString(this.hours)[1]
+      this.month1El.classList.remove('disable')
+      this.month2El.classList.remove('disable')
+    } else {
+      if (this.hours === 0) {
+        this.month1El.innerText = '1'
+        this.month2El.innerText = '2'
+      } else if (this.hours < 13) {
+        this.month1El.innerText = this.toString(this.hours)[0]
+        this.month2El.innerText = this.toString(this.hours)[1]
+      } else if (this.hours >= 13) {
+        this.month1El.innerText = this.toString(this.hours - 12)[0]
+        this.month2El.innerText = this.toString(this.hours - 12)[1]
+      }
+      if (this.hours === 0) {
+        this.month1El.classList.remove('disable')
+        this.month2El.classList.remove('disable')
+      } else if (0 < this.hours && this.hours <= 9) {
+        this.month1El.classList.add('disable')
+        this.month2El.classList.remove('disable')
+      } else if (9 < this.hours && this.hours <= 12) {
+        this.month1El.classList.remove('disable')
+        this.month2El.classList.remove('disable')
+      } else if (12 < this.hours && this.hours <= 21) {
+        this.month1El.classList.add('disable')
+        this.month2El.classList.remove('disable')
+      } else if (21 < this.hours) {
+        this.month1El.classList.remove('disable')
+        this.month2El.classList.remove('disable')
+      }
+    }
+    this.sepMonthAndDayEl.innerText = ':'
+    this.dayOfMonth1El.innerText = this.toString(this.minutes)[0]
+    this.dayOfMonth2El.innerText = this.toString(this.minutes)[1]
+  }
+
+  activateElemenstOnModeStopwatch() {
+    if (this.format24hr) {
+      this.format24hrEl.classList.remove('disable')
+      this.pmEl.classList.add('disable')
+    } else {
+      this.format24hrEl.classList.add('disable')
+      if (this.hours >= 12) {
+        this.pmEl.classList.remove('disable')
+      } else {
+        this.pmEl.classList.add('disable')
+      }
+    }
+  }
+
+  displayModeStopwatch() {
+    this.activateElemenstOnModeStopwatch()
+    if (this.stopwatchSplit === true) {
+      if (this.stopwatchHours < 1) {
+        this.hours1El.innerText = this.toString(this.stopwatchSplitMinutes)[0]
+        this.hours2El.innerText = this.toString(this.stopwatchSplitMinutes)[1]
+        this.minutes1El.innerText = this.toString(this.stopwatchSplitSeconds)[0]
+        this.minutes2El.innerText = this.toString(this.stopwatchSplitSeconds)[1]
+        this.seconds1El.innerText = this.toString(
+          this.stopwatchSplitHundredthsOfSeconds
+        )[0]
+        this.seconds2El.innerText = this.toString(
+          this.stopwatchSplitHundredthsOfSeconds
+        )[1]
+      } else {
+        this.hours1El.innerText = this.toString(this.stopwatchSplitHours)[0]
+        this.hours2El.innerText = this.toString(this.stopwatchSplitHours)[1]
+        this.minutes1El.innerText = this.toString(this.stopwatchSplitMinutes)[0]
+        this.minutes2El.innerText = this.toString(this.stopwatchSplitMinutes)[1]
+        this.seconds1El.innerText = this.toString(this.stopwatchSplitSeconds)[0]
+        this.seconds2El.innerText = this.toString(this.stopwatchSplitSeconds)[1]
+      }
+    } else {
+      if (this.stopwatchHours < 1) {
+        this.hours1El.innerText = this.toString(this.stopwatchMinutes)[0]
+        this.hours2El.innerText = this.toString(this.stopwatchMinutes)[1]
+        this.minutes1El.innerText = this.toString(this.stopwatchSeconds)[0]
+        this.minutes2El.innerText = this.toString(this.stopwatchSeconds)[1]
+        this.seconds1El.innerText = this.toString(
+          this.stopwatchHundredthsOfSeconds
+        )[0]
+        this.seconds2El.innerText = this.toString(
+          this.stopwatchHundredthsOfSeconds
+        )[1]
+      } else {
+        this.hours1El.innerText = this.toString(this.stopwatchHours)[0]
+        this.hours2El.innerText = this.toString(this.stopwatchHours)[1]
+        this.minutes1El.innerText = this.toString(this.stopwatchMinutes)[0]
+        this.minutes2El.innerText = this.toString(this.stopwatchMinutes)[1]
+        this.seconds1El.innerText = this.toString(this.stopwatchSeconds)[0]
+        this.seconds2El.innerText = this.toString(this.stopwatchSeconds)[1]
+      }
+    }
+    this.dayOfWeek1El.innerText = 'S'
+    this.dayOfWeek2El.innerText = 'T'
     if (this.format24hr) {
       this.month1El.innerText = this.toString(this.hours)[0]
       this.month2El.innerText = this.toString(this.hours)[1]
@@ -608,10 +733,6 @@ class Watch {
     }
   }
 
-  checkToStopAlarm() {
-    if (this.alarmActiveNow) this.alarmStop = true
-  }
-
   flashingSepMonthAndDay() {
     if (this.mode === 'timer' || this.mode === 'stopwatch') {
       if (this.idSepMonthAndDay === null) {
@@ -638,14 +759,19 @@ class Watch {
       },
       'timer': () => {
         this.displayModeTimer()
+      },
+      'stopwatch': () => {
+        this.displayModeStopwatch()
       }
     }
-    if (!modes[this.mode]) return
-    // nota para la alarma tambien
     this.checkSignal()
     this.checkAlarm()
     this.flashingSepMonthAndDay()
     modes[this.mode]()
+  }
+
+  checkToStopAlarm() {
+    if (this.alarmActiveNow) this.alarmStop = true
   }
 
   changeNextAdjust() {
@@ -835,13 +961,22 @@ class Watch {
     }, 500)
   }
 
+
   adjust() {
     this.checkToStopAlarm()
-    if (this.mode !== 'timer') {
+    if (this.mode !== 'timer' && this.mode !== 'stopwatch') {
       if (this.adjusting) {
         this.adjusting = false
         clearInterval(this.idAdjusting)
         this.adjustData = null
+        if (this.mode === 'time') {
+          console.log('go');
+          this.dayOfWeek = this.getDayOfWeek(
+            this.year,
+            this.month,
+            this.dayOfMonth
+          )
+        }
         if (this.mode === 'timer') {
           this.timerSetHours = this.timerHours
           this.timerSetMinutes = this.timerMinutes
@@ -853,29 +988,71 @@ class Watch {
         this.idAdjusting = this.flashingAdjustData()
       }
     } else {
-      if (this.adjusting) {
-        this.adjusting = false
-        clearInterval(this.idAdjusting)
-        this.adjustData = null
-        if (this.mode === 'timer') {
-          this.timerSetHours = this.timerHours
-          this.timerSetMinutes = this.timerMinutes
-          this.timerSetSeconds = this.timerSeconds
-        }
-      } else {
-        if (!(this.timerActive)) {
-          this.adjusting = true
-          this.changeNextAdjust()
-          this.idAdjusting = this.flashingAdjustData()
+      if (this.mode === 'timer') {
+        if (this.adjusting) {
+          this.adjusting = false
+          clearInterval(this.idAdjusting)
+          this.adjustData = null
+          if (this.mode === 'timer') {
+            this.timerSetHours = this.timerHours
+            this.timerSetMinutes = this.timerMinutes
+            this.timerSetSeconds = this.timerSeconds
+          }
         } else {
-          clearInterval(this.idTimer)
-          this.idTimer = null
-          this.timerFinish = true
-          this.timerActive = false
-          this.timerPause = false
-          this.timerHours = this.timerSetHours
-          this.timerMinutes = this.timerSetMinutes
-          this.timerSeconds = this.timerSetSeconds
+          if (!(this.timerActive)) {
+            this.adjusting = true
+            this.changeNextAdjust()
+            this.idAdjusting = this.flashingAdjustData()
+          } else {
+            clearInterval(this.idTimer)
+            this.idTimer = null
+            this.timerActive = false
+            this.timerPause = false
+            this.timerHours = this.timerSetHours
+            this.timerMinutes = this.timerSetMinutes
+            this.timerSeconds = this.timerSetSeconds
+          }
+        }
+      } else if (this.mode === 'stopwatch') {
+        if (this.stopwatchActive) {
+          if (this.stopwatchPause) {
+            if (this.stopwatchSplit === null) {
+              clearInterval(this.idStopwatch)
+              this.idStopwatch === null
+              this.stopwatchActive = false
+              this.stopwatchPause = false
+              this.stopwatchSplit = null
+              this.stopwatchHours = 0
+              this.stopwatchMinutes = 0
+              this.stopwatchSeconds = 0
+              this.stopwatchHundredthsOfSeconds = 0
+            } else {
+              if (this.stopwatchSplit === true) {
+                if (this.stopwatchSplitHours === this.stopwatchHours
+                  && this.stopwatchSplitMinutes === this.stopwatchMinutes
+                  && this.stopwatchSplitSeconds === this.stopwatchSeconds
+                  && this.stopwatchSplitHundredthsOfSeconds === this.stopwatchHundredthsOfSeconds
+                ) {
+                  clearInterval(this.idStopwatch)
+                  this.idStopwatch === null
+                  this.stopwatchActive = false
+                  this.stopwatchPause = null
+                  this.stopwatchSplit = null
+                  this.stopwatchHours = 0
+                  this.stopwatchMinutes = 0
+                  this.stopwatchSeconds = 0
+                  this.stopwatchHundredthsOfSeconds = 0
+                } else {
+                  this.stopwatchSplitHours = this.stopwatchHours
+                  this.stopwatchSplitMinutes = this.stopwatchMinutes
+                  this.stopwatchSplitSeconds = this.stopwatchSeconds
+                  this.stopwatchSplitHundredthsOfSeconds = this.stopwatchHundredthsOfSeconds
+                }
+              }
+            }
+          } else {
+            this.toggleSplitStopwatch()
+          }
         }
       }
     }
@@ -924,169 +1101,214 @@ class Watch {
     }
   }
 
+  togglePauseStopwatch() {
+    if (this.stopwatchPause === null) {
+      this.stopwatchPause = true
+    }
+    if (!this.stopwatchPause) {
+      this.stopwatchPause = true
+    } else {
+      this.stopwatchPause = false
+    }
+  }
+
+  toggleSplitStopwatch() {
+    if (this.stopwatchSplit === null) {
+      this.stopwatchSplit = true
+      this.stopwatchSplitHours = this.stopwatchHours
+      this.stopwatchSplitMinutes = this.stopwatchMinutes
+      this.stopwatchSplitSeconds = this.stopwatchSeconds
+      this.stopwatchSplitHundredthsOfSeconds = this.stopwatchHundredthsOfSeconds
+      return
+    }
+    if (!this.stopwatchSplit) {
+      this.stopwatchSplit = true
+      this.stopwatchSplitHours = this.stopwatchHours
+      this.stopwatchSplitMinutes = this.stopwatchMinutes
+      this.stopwatchSplitSeconds = this.stopwatchSeconds
+      this.stopwatchSplitHundredthsOfSeconds = this.stopwatchHundredthsOfSeconds
+    } else {
+      this.stopwatchSplit = false
+    }
+  }
+
   start() {
     this.checkToStopAlarm()
-    if (this.adjusting) {
-      const adjust = {
-        'time': {
-          'seconds': () => {
-            if (this.seconds >= 30) ++this.minutes
-            if (this.minutes > 59) this.minutes = 0
-            this.seconds = 0
-          },
-          'hours': () => {
-            ++this.hours
-            if (this.hours > 23) {
-              this.hours = 0
-            }
-            this.displayScreen()
-            if (!this.format24hr) {
-              if (this.hours1El.innerText === '1') {
-                if (this.hours2El.classList.contains('disable')) {
-                  this.hours1El.classList.add('disable')
+    if (this.mode !== 'stopwatch') {
+      if (this.adjusting) {
+        const adjust = {
+          'time': {
+            'seconds': () => {
+              if (this.seconds >= 30) ++this.minutes
+              if (this.minutes > 59) this.minutes = 0
+              this.seconds = 0
+            },
+            'hours': () => {
+              ++this.hours
+              if (this.hours > 23) {
+                this.hours = 0
+              }
+              this.displayScreen()
+              if (!this.format24hr) {
+                if (this.hours1El.innerText === '1') {
+                  if (this.hours2El.classList.contains('disable')) {
+                    this.hours1El.classList.add('disable')
+                  } else {
+                    this.hours1El.classList.remove('disable')
+                  }
                 } else {
-                  this.hours1El.classList.remove('disable')
+                  this.hours1El.classList.add('disable')
                 }
-              } else {
-                this.hours1El.classList.add('disable')
               }
-            }
-          },
-          'minutes': () => {
-            ++this.minutes
-            if (this.minutes > 59) this.minutes = 0
-          },
-          'year': () => {
-            ++this.year
-            if (this.year > 2099) this.year = 2000
-          },
-          'month': () => {
-            ++this.month
-            if (this.month > 9) {
-              if (this.month2El.classList.contains('disable')) {
+            },
+            'minutes': () => {
+              ++this.minutes
+              if (this.minutes > 59) this.minutes = 0
+            },
+            'year': () => {
+              ++this.year
+              if (this.year > 2099) this.year = 2000
+            },
+            'month': () => {
+              ++this.month
+              if (this.month > 9) {
+                if (this.month2El.classList.contains('disable')) {
+                  this.month1El.classList.add('disable')
+                } else {
+                  this.month1El.classList.remove('disable')
+                }
+              }
+              if (this.month > 12) {
+                this.month = 1
                 this.month1El.classList.add('disable')
-              } else {
-                this.month1El.classList.remove('disable')
+              }
+            },
+            'dayOfMonth': () => {
+              ++this.dayOfMonth
+              if (this.dayOfMonth > 9) {
+                if (this.dayOfMonth2El.classList.contains('disable')) {
+                  this.dayOfMonth1El.classList.add('disable')
+                } else {
+                  this.dayOfMonth1El.classList.remove('disable')
+                }
+              }
+              if (this.dayOfMonth > this.getMaxDaysOnMonth(
+                this.month,
+                this.year
+              )) {
+                this.dayOfMonth = 1
+                this.dayOfMonth1El.classList.add('disable')
               }
             }
-            if (this.month > 12) {
-              this.month = 1
-              this.month1El.classList.add('disable')
-            }
           },
-          'dayOfMonth': () => {
-            ++this.dayOfMonth
-            if (this.dayOfMonth > 9) {
-              if (this.dayOfMonth2El.classList.contains('disable')) {
+          'alarm': {
+            'alarmHours': () => {
+              ++this.alarmHours
+              if (this.alarmHours > 23) {
+                this.alarmHours = 0
+              }
+              this.displayScreen()
+              if (!this.format24hr) {
+                if (this.hours1El.innerText === '1') {
+                  if (this.hours2El.classList.contains('disable')) {
+                    this.hours1El.classList.add('disable')
+                  } else {
+                    this.hours1El.classList.remove('disable')
+                  }
+                } else {
+                  this.hours1El.classList.add('disable')
+                }
+              }
+            },
+            'alarmMinutes': () => {
+              ++this.alarmMinutes
+              if (this.alarmMinutes > 59) this.alarmMinutes = 0
+            },
+            'alarmMonth': () => {
+              if (this.alarmMonth === null) {
+                this.alarmMonth = 1
                 this.dayOfMonth1El.classList.add('disable')
               } else {
-                this.dayOfMonth1El.classList.remove('disable')
+                ++this.alarmMonth
               }
-            }
-            if (this.dayOfMonth > this.getMaxDaysOnMonth(
-              this.month,
-              this.year
-            )) {
-              this.dayOfMonth = 1
-              this.dayOfMonth1El.classList.add('disable')
-            }
-          }
-        },
-        'alarm': {
-          'alarmHours': () => {
-            ++this.alarmHours
-            if (this.alarmHours > 23) {
-              this.alarmHours = 0
-            }
-            this.displayScreen()
-            if (!this.format24hr) {
-              if (this.hours1El.innerText === '1') {
-                if (this.hours2El.classList.contains('disable')) {
-                  this.hours1El.classList.add('disable')
+              if (this.alarmMonth > 9) {
+                if (this.month2El.classList.contains('disable')) {
+                  this.month1El.classList.add('disable')
                 } else {
-                  this.hours1El.classList.remove('disable')
+                  this.month1El.classList.remove('disable')
                 }
-              } else {
-                this.hours1El.classList.add('disable')
               }
-            }
-          },
-          'alarmMinutes': () => {
-            ++this.alarmMinutes
-            if (this.alarmMinutes > 59) this.alarmMinutes = 0
-          },
-          'alarmMonth': () => {
-            if (this.alarmMonth === null) {
-              this.alarmMonth = 1
-              this.dayOfMonth1El.classList.add('disable')
-            } else {
-              ++this.alarmMonth
-            }
-            if (this.alarmMonth > 9) {
-              if (this.month2El.classList.contains('disable')) {
+              if (this.alarmMonth > 12) {
+                this.alarmMonth = null
                 this.month1El.classList.add('disable')
-              } else {
-                this.month1El.classList.remove('disable')
               }
-            }
-            if (this.alarmMonth > 12) {
-              this.alarmMonth = null
-              this.month1El.classList.add('disable')
-            }
-          },
-          'alarmDayOfMonth': () => {
-            if (this.alarmDayOfMonth === null) {
-              this.alarmDayOfMonth = 1
-              this.dayOfMonth1El.classList.add('disable')
-            } else {
-              ++this.alarmDayOfMonth
-            }
-            if (this.alarmDayOfMonth > 9) {
-              if (this.dayOfMonth2El.classList.contains('disable')) {
+            },
+            'alarmDayOfMonth': () => {
+              if (this.alarmDayOfMonth === null) {
+                this.alarmDayOfMonth = 1
                 this.dayOfMonth1El.classList.add('disable')
               } else {
-                this.dayOfMonth1El.classList.remove('disable')
+                ++this.alarmDayOfMonth
+              }
+              if (this.alarmDayOfMonth > 9) {
+                if (this.dayOfMonth2El.classList.contains('disable')) {
+                  this.dayOfMonth1El.classList.add('disable')
+                } else {
+                  this.dayOfMonth1El.classList.remove('disable')
+                }
+              }
+              if (this.alarmDayOfMonth > this.getMaxDaysOnMonth(
+                this.alarmMonth || 1,
+                this.year
+              )) {
+                this.alarmDayOfMonth = null
               }
             }
-            if (this.alarmDayOfMonth > this.getMaxDaysOnMonth(
-              this.alarmMonth || 1,
-              this.year
-            )) {
-              this.alarmDayOfMonth = null
+          },
+          'timer': {
+            'timerHours': () => {
+              ++this.timerHours
+              if (this.timerHours > 23) this.timerHours = 0
+            },
+            'timerMinutes': () => {
+              ++this.timerMinutes
+              if (this.timerMinutes > 59) this.timerMinutes = 0
+            },
+            'timerSeconds': () => {
+              ++this.timerSeconds
+              if (this.timerSeconds > 59) this.timerSeconds = 0
             }
           }
-        },
-        'timer': {
-          'timerHours': () => {
-            ++this.timerHours
-            if (this.timerHours > 23) this.timerHours = 0
-          },
-          'timerMinutes': () => {
-            ++this.timerMinutes
-            if (this.timerMinutes > 59) this.timerMinutes = 0
-          },
-          'timerSeconds': () => {
-            ++this.timerSeconds
-            if (this.timerSeconds > 59) this.timerSeconds = 0
+        }
+        adjust[this.mode][this.adjustData]()
+        this.displayScreen()
+      } else {
+        if (this.mode === 'time') {
+          this.toggleFlash()
+        } else if (this.mode === 'alarm') {
+          this.toggleAlarms()
+        } else if (this.mode === 'timer') {
+          if (!this.timerActive) {
+            this.idTimer = setInterval(() => {
+              this.updateTimer()
+            }, 1000)
+            this.timerActive = true
+          } else {
+            this.togglePauseTimer()
           }
         }
       }
-      adjust[this.mode][this.adjustData]()
-      this.displayScreen()
     } else {
-      if (this.mode === 'time') {
-        this.toggleFlash()
-      } else if (this.mode === 'alarm') {
-        this.toggleAlarms()
-      } else if (this.mode === 'timer') {
-        if (!this.timerActive) {
-          this.idTimer = setInterval(() => {
-            this.updateTimer()
-          }, 1000)
-          this.timerActive = true
-        } else {
-          this.togglePauseTimer()
-        }
+      if (!this.stopwatchActive) {
+        this.idStopwatch = setInterval(() => {
+          this.updateStopwatch()
+        }, 10)
+        this.stopwatchActive = true
+        this.stopwatchSplit = null
+        this.stopwatchPause = false
+      } else {
+        if (this.stopwatchPause && this.stopwatchSplit === true) return
+        this.togglePauseStopwatch()
       }
     }
   }
