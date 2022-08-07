@@ -162,3 +162,10 @@ body {
 .lightOn {
   background-color: #22ff22;
 }
+
+.A,
+.B,
+.C,
+.D {
+  border-radius: 50%;
+}

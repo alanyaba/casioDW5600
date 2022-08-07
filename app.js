@@ -42,12 +42,13 @@ class Watch {
     this.autoEl = autoEl
     this.flashEl = flashEl
 
-    this.hours = 0
-    this.minutes = 50
-    this.seconds = 56
-    this.year = 2000
-    this.month = 2
-    this.dayOfMonth = 29
+    const currentTime = new Date()
+    this.hours = currentTime.getHours()
+    this.minutes = currentTime.getMinutes()
+    this.seconds = currentTime.getSeconds()
+    this.year = currentTime.getFullYear()
+    this.month = currentTime.getMonth() + 1
+    this.dayOfMonth = currentTime.getDate()
     this.dayOfWeek = this.getDayOfWeek(
       this.year,
       this.month,
@@ -66,20 +67,22 @@ class Watch {
 
     this.alarm = true
     this.sig = true
+    this.sound = new Audio('./alarm.wav')
+    this.sound.loop = true
 
-    this.alarmHours = 0
-    this.alarmMinutes = 0
+    this.alarmHours = 6
+    this.alarmMinutes = 15
     this.alarmMonth = null
     this.alarmDayOfMonth = null
     this.idAlarm = null
 
     this.firstFlashingAlarm = false
     this.alarmStop = false
-    
-    this.timerSetSeconds = 0
+
+    this.timerSetSeconds = 5
     this.timerSetMinutes = 0
     this.timerSetHours = 0
-    this.timerSeconds = 0
+    this.timerSeconds = 5
     this.timerMinutes = 0
     this.timerHours = 0
 
@@ -204,12 +207,22 @@ class Watch {
         this.idTimer = null
         this.timerActive = false
         this.timerPause = false
+        this.timerHours = this.timerSetHours
+        this.timerMinutes = this.timerSetMinutes
+        this.timerSeconds = this.timerSetSeconds
       } else {
         this.timerHours = this.timerSetHours
         this.timerMinutes = this.timerSetMinutes
         this.timerSeconds = this.timerSetSeconds
       }
       if (this.flash) this.flashingAlarm()
+      if (this.alarm) {
+        this.sound.play()
+        setTimeout(() => {
+          this.sound.pause()
+          this.sound.load()
+        }, 1500)
+      }
     }
     if (this.timerSeconds < 0) {
       this.timerSeconds = 59
@@ -617,8 +630,13 @@ class Watch {
         this.seconds2El.innerText = this.toString(this.stopwatchSeconds)[1]
       }
     }
-    this.dayOfWeek1El.innerText = 'S'
-    this.dayOfWeek2El.innerText = 'T'
+    if (this.stopwatchSplit === true) {
+      this.dayOfWeek1El.innerText = 'S'
+      this.dayOfWeek2El.innerText = 'P'
+    } else {
+      this.dayOfWeek1El.innerText = 'S'
+      this.dayOfWeek2El.innerText = 'T'
+    }
     if (this.format24hr) {
       this.month1El.innerText = this.toString(this.hours)[0]
       this.month2El.innerText = this.toString(this.hours)[1]
@@ -677,6 +695,11 @@ class Watch {
       && !this.adjusting
     ) {
       if (this.sig) {
+        this.sound.play()
+        setTimeout(() => {
+          this.sound.pause()
+          this.sound.load()
+        }, 1500)
         if (this.flash) {
           if (!this.firstFlashingAlarm) {
             this.firstFlashingAlarm = true
@@ -698,12 +721,22 @@ class Watch {
     ) {
       if (this.alarmMonth === null && this.alarmDayOfMonth === null) {
         if (this.alarm) {
+          this.sound.play()
+          setTimeout(() => {
+            this.sound.pause()
+            this.sound.load()
+          }, 59500)
           if (this.flash) this.flashingAlarm()
             this.alarmActiveNow = true
         }
       } else if (this.alarmMonth && this.alarmDayOfMonth === null) {
         if (this.alarmMonth === this.month) {
           if (this.alarm) {
+            this.sound.play()
+            setTimeout(() => {
+              this.sound.pause()
+              this.sound.load()
+            }, 59500)
             if (this.flash) this.flashingAlarm()
             this.alarmActiveNow = true
           }
@@ -711,6 +744,11 @@ class Watch {
       } else if (this.alarmMonth === null && this.alarmDayOfMonth) {
         if (this.alarmDayOfMonth === this.dayOfMonth) {
           if (this.alarm) {
+            this.sound.play()
+            setTimeout(() => {
+              this.sound.pause()
+              this.sound.load()
+            }, 59500)
             if (this.flash) this.flashingAlarm()
             this.alarmActiveNow = true
           }
@@ -720,6 +758,11 @@ class Watch {
           && this.alarmDayOfMonth === this.dayOfMonth
         ) {
           if (this.alarm) {
+            this.sound.play()
+            setTimeout(() => {
+              this.sound.pause()
+              this.sound.load()
+            }, 59500)
             if (this.flash) this.flashingAlarm()
             this.alarmActiveNow = true
           }
@@ -771,7 +814,11 @@ class Watch {
   }
 
   checkToStopAlarm() {
-    if (this.alarmActiveNow) this.alarmStop = true
+    if (this.alarmActiveNow) {
+      this.sound.pause()
+      this.sound.load()
+      this.alarmStop = true
+    }
   }
 
   changeNextAdjust() {
@@ -961,7 +1008,6 @@ class Watch {
     }, 500)
   }
 
-
   adjust() {
     this.checkToStopAlarm()
     if (this.mode !== 'timer' && this.mode !== 'stopwatch') {
@@ -1048,6 +1094,16 @@ class Watch {
                   this.stopwatchSplitSeconds = this.stopwatchSeconds
                   this.stopwatchSplitHundredthsOfSeconds = this.stopwatchHundredthsOfSeconds
                 }
+              } else {
+                clearInterval(this.idStopwatch)
+                this.idStopwatch === null
+                this.stopwatchActive = false
+                this.stopwatchPause = null
+                this.stopwatchSplit = null
+                this.stopwatchHours = 0
+                this.stopwatchMinutes = 0
+                this.stopwatchSeconds = 0
+                this.stopwatchHundredthsOfSeconds = 0
               }
             }
           } else {
